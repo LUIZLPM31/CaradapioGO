@@ -9,7 +9,7 @@ if (!isLoggedIn()) {
 // Processar ações
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn = getConnection();
-    
+
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'add_item':
@@ -30,6 +30,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
                 $stmt->execute([$status, $order_id]);
                 $success = "Status do pedido atualizado!";
+                break;
+
+            case 'edit_item':
+                $item_id = intval($_POST['item_id']);
+                $nome = sanitize($_POST['nome']);
+                $descricao = sanitize($_POST['descricao']);
+                $preco = floatval($_POST['preco']);
+                $categoria_id = intval($_POST['categoria_id']);
+
+                $stmt = $conn->prepare("UPDATE menu_items SET nome = ?, descricao = ?, preco = ?, categoria_id = ? WHERE id = ?");
+                $stmt->execute([$nome, $descricao, $preco, $categoria_id, $item_id]);
+                $success = "Item editado com sucesso!";
+                break;
+
+            case 'delete_item':
+                $item_id = intval($_POST['item_id']);
+                $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
+                $stmt->execute([$item_id]);
+                $success = "Item excluído com sucesso!";
                 break;
         }
     }
@@ -209,13 +228,59 @@ try {
                                 <p class="item-description"><?php echo htmlspecialchars($item['descricao']); ?></p>
                                 <p class="item-price"><?php echo formatPrice($item['preco']); ?></p>
                                 <div class="item-actions">
-                                    <button class="btn btn-secondary btn-sm">Editar</button>
-                                    <button class="btn btn-danger btn-sm">Excluir</button>
+                                    <button class="btn btn-secondary btn-sm edit-btn"
+                                        data-id="<?php echo $item['id']; ?>"
+                                        data-nome="<?php echo htmlspecialchars($item['nome']); ?>"
+                                        data-descricao="<?php echo htmlspecialchars($item['descricao']); ?>"
+                                        data-preco="<?php echo $item['preco']; ?>"
+                                        data-categoria="<?php echo $item['categoria_id']; ?>"
+                                        type="button">Editar</button>
+                                    <form method="POST" style="display:inline;">
+                                        <input type="hidden" name="action" value="delete_item">
+                                        <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este item?')">Excluir</button>
+                                    </form>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
+
+                <!-- Formulário de edição de item (oculto) -->
+                <div id="edit-item-modal" style="display:none; background:#fff; border:1px solid #ccc; padding:20px; position:fixed; top:10%; left:50%; transform:translateX(-50%); z-index:1000;">
+                    <h3>Editar Item</h3>
+                    <form method="POST" id="edit-item-form">
+                        <input type="hidden" name="action" value="edit_item">
+                        <input type="hidden" name="item_id" id="edit-item-id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-nome">Nome:</label>
+                                <input type="text" id="edit-nome" name="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-categoria">Categoria:</label>
+                                <select id="edit-categoria" name="categoria_id" required>
+                                    <?php foreach ($categories as $category): ?>
+                                        <option value="<?php echo $category['id']; ?>">
+                                            <?php echo htmlspecialchars($category['nome']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-preco">Preço:</label>
+                                <input type="number" id="edit-preco" name="preco" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-descricao">Descrição:</label>
+                            <textarea id="edit-descricao" name="descricao" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-item-modal').style.display='none'">Cancelar</button>
+                    </form>
+                </div>
+                <!-- Fim do formulário de edição -->
             </section>
         </div>
     </main>
@@ -243,6 +308,18 @@ try {
                         targetSection.style.display = 'block';
                     }
                 }
+            });
+        });
+
+        // Edição de item do cardápio
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('edit-item-id').value = this.dataset.id;
+                document.getElementById('edit-nome').value = this.dataset.nome;
+                document.getElementById('edit-descricao').value = this.dataset.descricao;
+                document.getElementById('edit-preco').value = this.dataset.preco;
+                document.getElementById('edit-categoria').value = this.dataset.categoria;
+                document.getElementById('edit-item-modal').style.display = 'block';
             });
         });
     </script>
