@@ -45,7 +45,18 @@ try {
             </div>
             <nav class="nav">
                 <a href="#cardapio" class="nav-link">Cardápio</a>
-                <a href="#carrinho" class="nav-link">Carrinho (<span id="cart-count">0</span>)</a>
+                <a href="#carrinho" class="nav-link" style="display: flex; align-items: center;">
+        <span style="display: flex; align-items: center;">
+            <!-- Novo Ícone SVG de carrinho Shopee -->
+            <svg viewBox="0 0 26.6 25.6" width="22" height="22" class="shopee-svg-icon navbar__link-icon icon-shopping-cart-2" style="margin-right:4px;">
+                <title>Shopping Cart Icon</title>
+                <polyline fill="none" points="2 1.7 5.5 1.7 9.6 18.3 21.2 18.3 24.6 6.1 7 6.1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2.5"></polyline>
+                <circle cx="10.7" cy="23" r="2.2" stroke="none" fill="currentColor"></circle>
+                <circle cx="19.7" cy="23" r="2.2" stroke="none" fill="currentColor"></circle>
+            </svg>
+            <span id="cart-count" style="font-weight:bold; margin-left:2px;"></span>
+        </span>
+    </a>
                 <a href="admin/" class="nav-link">Admin</a>
             </nav>
         </div>

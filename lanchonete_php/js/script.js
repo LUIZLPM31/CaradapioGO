@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeNavigation();
     initializeCheckoutForm();
     loadCartFromStorage();
+    updateCartCount();
 });
 
 // Filtros de categoria
@@ -756,4 +757,19 @@ function showOrderSuccess(orderId) {
     document.getElementById('checkout-form').reset();
     appliedCoupon = null;
 }
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cardapiogo_cart') || '[]');
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = document.getElementById('cart-count');
+    if (count > 0) {
+        cartCount.textContent = `(${count})`;
+    } else {
+        cartCount.textContent = '';
+    }
+}
+
+// Chame updateCartCount() sempre que o carrinho for alterado
+document.addEventListener('DOMContentLoaded', updateCartCount);
+// E também após adicionar/remover itens do carrinho
 
