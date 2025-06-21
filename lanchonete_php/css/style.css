@@ -27,7 +27,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    background: linear-gradient(rgba(44, 95, 45, 0.9), rgba(44, 95, 45, 0.9)), url('fundo.jpg');
+    background: linear-gradient(rgba(44, 95, 45), rgba(44, 95, 45)), url('fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -110,7 +110,11 @@ body {
 
 /* Hero section */
 .hero {
-    background: rgba(255, 255, 255, 0.8);
+    background: linear-gradient( rgba(255, 255, 255, 0.7)), url('../fundo.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--text-color);
     padding: 80px 0;
     text-align: center;
     margin: 20px;
@@ -186,7 +190,11 @@ body {
 
 /* Cardápio section */
 .cardapio {
-    background: rgba(255, 255, 255, 0.95);
+    background: linear-gradient( rgba(255, 255, 255, 0.7)), url('../fundo.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--text-color);
     margin: 20px;
     padding: 40px 0;
     border-radius: var(--border-radius);
@@ -501,10 +509,19 @@ body {
 
 .admin-main {
     padding: 40px 0;
+    background: linear-gradient( rgba(255, 255, 255, 0.3)), url('../fundo.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    color: var(--text-color);
+    margin: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+
 }
 
 .admin-section {
-    background: var(--secondary-color);
+    background: linear-gradient( rgba(255, 255, 255, 0.3));
     padding: 30px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
