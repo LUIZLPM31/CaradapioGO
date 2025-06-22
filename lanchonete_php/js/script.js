@@ -541,33 +541,34 @@ function startPaymentCheck(orderId) {
 }
 
 function checkPaymentStatus() {
-    if (!currentOrderId) return;
-    
+    const orderNumber = document.getElementById('order-number').textContent;
+    if (!orderNumber) {
+        alert('Número do pedido não encontrado!');
+        return;
+    }
     fetch('confirm_payment.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            order_id: currentOrderId,
-            action: 'check_status'
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderNumber, action: 'check_status' })
     })
     .then(response => response.json())
     .then(data => {
+        const paymentStatus = document.getElementById('payment-status');
         if (data.success && data.status_pagamento === 'confirmado') {
-            // Pagamento confirmado
-            clearInterval(paymentCheckInterval);
-            showPaymentConfirmed();
-            
-            // Simular confirmação automática após 2 segundos
-            setTimeout(() => {
-                confirmPayment();
-            }, 2000);
+            paymentStatus.className = 'payment-status success';
+            paymentStatus.innerHTML = '<strong>Pagamento confirmado!</strong>';
+        } else if (data.success && data.status_pagamento === 'pendente') {
+            paymentStatus.className = 'payment-status pending';
+            paymentStatus.innerHTML = '<strong>Aguardando pagamento...</strong><p>Pedido #' + orderNumber + '</p>';
+        } else {
+            paymentStatus.className = 'payment-status error';
+            paymentStatus.innerHTML = '<strong>Erro ao verificar pagamento.</strong>';
         }
     })
-    .catch(error => {
-        console.error('Erro ao verificar status:', error);
+    .catch(() => {
+        const paymentStatus = document.getElementById('payment-status');
+        paymentStatus.className = 'payment-status error';
+        paymentStatus.innerHTML = '<strong>Erro de conexão.</strong>';
     });
 }
 

@@ -950,7 +950,7 @@ body {
 .qr-modal-content {
     background-color: white;
     margin: 5% auto;
-    padding: 2rem;
+    padding: 20px;
     border-radius: 8px;
     width: 90%;
     max-width: 400px;
@@ -959,6 +959,14 @@ body {
 
 .qr-code-container {
     margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .qr-code-container img {

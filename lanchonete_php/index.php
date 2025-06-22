@@ -32,7 +32,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo SITE_NAME; ?> - <?php echo SITE_SLOGAN; ?></title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="logo1.png">
 </head>
 <body>
     <header class="header">
@@ -328,4 +328,27 @@ try {
                 </div>
             </div>
         </div>
+
+        <!-- Script para atualizar contagem do carrinho -->
+<script>
+function updateCartCount() {
+    // Supondo que o carrinho está salvo no localStorage como array de objetos
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let count = 0;
+    cart.forEach(item => {
+        count += item.quantity || 1; // ou ajuste conforme sua estrutura
+    });
+    const cartCount = document.getElementById('cart-count');
+    if (count > 0) {
+        cartCount.textContent = count;
+    } else {
+        cartCount.textContent = '';
+    }
+}
+
+// Atualiza ao carregar a página
+document.addEventListener('DOMContentLoaded', updateCartCount);
+
+// Chame updateCartCount() sempre que adicionar/remover itens do carrinho
+</script>
 

@@ -194,7 +194,7 @@ class QRCode{
 	 * ISO/IEC 18004:2000 8.3.2 - Numeric Mode
 	 */
 	public function addNumericSegment(string $data):static{
-		return $this->addSegment(new Number($data));
+		return $this->addSegment(new Number($data)); // Ensure Number implements QRDataModeInterface
 	}
 
 	/**
