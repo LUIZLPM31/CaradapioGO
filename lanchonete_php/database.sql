@@ -103,14 +103,14 @@ INSERT INTO categories (nome, descricao) VALUES
 
 -- Itens do cardápio de exemplo
 INSERT INTO menu_items (nome, descricao, preco, categoria_id, imagem) VALUES 
-('X-Burger Clássico', 'Hambúrguer artesanal com carne bovina, queijo, alface, tomate e molho especial', 18.90, 1, NULL),
+('X-Burger Clássico', 'Hambúrguer artesanal com carne bovina, queijo, alface, tomate e molho especial', 18.90, 1, 'X-Burger Clássico.jpg'),
 ('X-Bacon', 'Hambúrguer com carne bovina, bacon crocante, queijo e molho barbecue', 22.90, 1, 'x-bacon.jpg'),
-('X-Frango', 'Hambúrguer de frango grelhado com queijo, alface e maionese temperada', 19.90, 1, NULL),
-('Coca-Cola 350ml', 'Refrigerante Coca-Cola gelado', 5.50, 2, 'refrigerante.jpg'),
-('Suco de Laranja', 'Suco natural de laranja 300ml', 7.90, 2, NULL),
+('X-Frango', 'Hambúrguer de frango grelhado com queijo, alface e maionese temperada', 19.90, 1, 'frango.jpg'),
+('Coca-Cola 350ml', 'Refrigerante Coca-Cola gelado', 5.50, 2, 'coca.jpg'),
+('Suco de Laranja', 'Suco natural de laranja 300ml', 7.90, 2, 'suco.jpg'),
 ('Batata Frita Grande', 'Porção de batata frita crocante para 2-3 pessoas', 15.90, 3, 'batata-frita.jpg'),
-('Milk Shake de Chocolate', 'Cremoso milk shake de chocolate com chantilly', 12.90, 4, NULL),
-('Combo X-Burger', 'X-Burger Clássico + Batata Média + Refrigerante', 28.90, 5, NULL),
+('Milk Shake de Chocolate', 'Cremoso milk shake de chocolate com chantilly', 12.90, 4, 'milk.jpg'),
+('Combo X-Burger', 'X-Burger Clássico + Batata Média + Refrigerante', 28.90, 5, 'combo.jpg'),
 ('X-Tudo', 'Hambúrguer completo com carne, queijo, bacon, ovo, alface, tomate e molho especial', 25.90, 1, 'x-tudo.jpg'),
 ('X-Salada', 'Hambúrguer com carne, queijo, alface, tomate e maionese', 19.90, 1, 'x-salada.jpg'),
 ('X-Calabresa', 'Hambúrguer com carne, queijo e calabresa fatiada', 21.90, 1, 'x-calabresa.jpg');
