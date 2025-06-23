@@ -1,126 +1,129 @@
 <?php
+// Desabilitar exibição de erros para não quebrar o JSON
+ini_set('display_errors', 0);
+error_reporting(0);
+
 require_once 'includes/config.php';
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Método não permitido']);
+// Função para retornar erro JSON
+function returnError($message, $code = 400) {
+    http_response_code($code);
+    echo json_encode(['success' => false, 'error' => $message]);
     exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    returnError('Método não permitido', 405);
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input || !isset($input['order_id'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'ID do pedido é obrigatório']);
-    exit;
+    returnError('ID do pedido é obrigatório');
 }
 
 $order_id = intval($input['order_id']);
-$action = isset($input['action']) ? $input['action'] : 'confirm';
+
+if ($order_id <= 0) {
+    returnError('ID do pedido inválido');
+}
 
 try {
     $conn = getConnection();
     
-    if ($action === 'check_status') {
-        // Verificar status do pagamento
-        $stmt = $conn->prepare("
-            SELECT id, status_pagamento, data_confirmacao 
-            FROM orders 
-            WHERE id = ?
-        ");
-        $stmt->execute([$order_id]);
-        $order = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$order) {
-            echo json_encode(['error' => 'Pedido não encontrado']);
-            exit;
-        }
-        
-        echo json_encode([
-            'success' => true,
-            'status_pagamento' => $order['status_pagamento'],
-            'data_confirmacao' => $order['data_confirmacao']
-        ]);
-        
-    } else if ($action === 'confirm') {
-        // Confirmar pagamento (simulado - em produção verificar com API do banco)
-        $stmt = $conn->prepare("
-            UPDATE orders 
-            SET status_pagamento = 'confirmado', 
-                status = 'confirmado',
-                data_confirmacao = NOW() 
-            WHERE id = ? AND status_pagamento = 'pendente'
-        ");
-        $stmt->execute([$order_id]);
-        
-        if ($stmt->rowCount() > 0) {
-            // Buscar dados do pedido para o recibo
-            $stmt = $conn->prepare("
-                SELECT o.*, 
-                       GROUP_CONCAT(
-                           CONCAT(mi.nome, ' (', oi.quantidade, 'x ', oi.preco_unitario, ')')
-                           SEPARATOR ', '
-                       ) as itens
-                FROM orders o
-                LEFT JOIN order_items oi ON o.id = oi.order_id
-                LEFT JOIN menu_items mi ON oi.item_id = mi.id
-                WHERE o.id = ?
-                GROUP BY o.id
-            ");
-            $stmt->execute([$order_id]);
-            $order = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Pagamento confirmado com sucesso!',
-                'recibo' => generateReceipt($order)
-            ]);
-        } else {
-            echo json_encode(['error' => 'Não foi possível confirmar o pagamento']);
-        }
+    if (!$conn) {
+        returnError('Erro de conexão com banco de dados');
     }
     
-} catch(PDOException $e) {
-    echo json_encode(['error' => 'Erro ao processar confirmação: ' . $e->getMessage()]);
-}
-
-function generateReceipt($order) {
-    $recibo = [
-        'numero_pedido' => str_pad($order['id'], 6, '0', STR_PAD_LEFT),
-        'data_pedido' => date('d/m/Y H:i:s', strtotime($order['data'])),
-        'data_confirmacao' => date('d/m/Y H:i:s', strtotime($order['data_confirmacao'])),
-        'cliente' => [
-            'nome' => $order['cliente_nome'],
-            'telefone' => $order['cliente_telefone'],
-            'email' => $order['cliente_email']
-        ],
-        'entrega' => [
-            'tipo' => $order['tipo_entrega'],
-            'endereco' => $order['tipo_entrega'] === 'entrega' ? 
-                $order['endereco_entrega'] . ', ' . $order['endereco_numero'] . 
-                ($order['endereco_complemento'] ? ', ' . $order['endereco_complemento'] : '') .
-                ' - ' . $order['endereco_bairro'] . ', ' . $order['endereco_cidade'] . 
-                ' - CEP: ' . $order['endereco_cep'] : 'Retirar no balcão'
-        ],
-        'pagamento' => [
-            'forma' => ucfirst($order['forma_pagamento']),
-            'status' => 'Confirmado'
-        ],
-        'valores' => [
-            'subtotal' => number_format($order['subtotal'], 2, ',', '.'),
-            'desconto' => number_format($order['cupom_desconto'], 2, ',', '.'),
-            'taxa_entrega' => number_format($order['taxa_entrega'], 2, ',', '.'),
-            'total' => number_format($order['total'], 2, ',', '.')
-        ],
-        'itens' => $order['itens'],
-        'observacoes' => $order['observacoes']
-    ];
+    // Verificar se o pedido existe
+    $stmt = $conn->prepare("SELECT id, status_pagamento, total FROM orders WHERE id = ?");
+    $stmt->execute([$order_id]);
+    $order = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    return $recibo;
+    if (!$order) {
+        returnError('Pedido não encontrado');
+    }
+    
+    if ($order['status_pagamento'] === 'confirmado') {
+        returnError('Pagamento já foi confirmado');
+    }
+    
+    // Atualizar status do pagamento
+    $stmt = $conn->prepare("UPDATE orders SET status_pagamento = 'confirmado', status = 'confirmado' WHERE id = ?");
+    $result = $stmt->execute([$order_id]);
+    
+    if (!$result) {
+        returnError('Erro ao atualizar status do pagamento');
+    }
+    
+    // Buscar dados completos do pedido para o recibo
+    $stmt = $conn->prepare("
+        SELECT o.*, 
+               GROUP_CONCAT(
+                   CONCAT(mi.nome, ' (', oi.quantidade, 'x R$ ', FORMAT(oi.preco_unitario, 2), ')')
+                   SEPARATOR '\n'
+               ) as itens
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN menu_items mi ON oi.item_id = mi.id
+        WHERE o.id = ?
+        GROUP BY o.id
+    ");
+    $stmt->execute([$order_id]);
+    $orderComplete = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$orderComplete) {
+        returnError('Erro ao buscar dados do pedido');
+    }
+    
+    // Função para gerar recibo
+    function generateReceipt($order) {
+        $recibo = "=== RECIBO ===\n";
+        $recibo .= "Pedido #" . $order['id'] . "\n";
+        $recibo .= "Cliente: " . $order['cliente_nome'] . "\n";
+        $recibo .= "Telefone: " . $order['cliente_telefone'] . "\n";
+        
+        if (isset($order['created_at'])) {
+            $recibo .= "Data: " . date('d/m/Y H:i', strtotime($order['created_at'])) . "\n";
+        }
+        
+        $recibo .= "Tipo: " . ucfirst($order['tipo_entrega']) . "\n";
+        $recibo .= "Pagamento: " . ucfirst($order['forma_pagamento']) . "\n\n";
+        
+        if ($order['itens']) {
+            $recibo .= "ITENS:\n" . $order['itens'] . "\n\n";
+        }
+        
+        $recibo .= "Subtotal: R$ " . number_format($order['subtotal'], 2, ',', '.') . "\n";
+        
+        if ($order['taxa_entrega'] > 0) {
+            $recibo .= "Taxa de entrega: R$ " . number_format($order['taxa_entrega'], 2, ',', '.') . "\n";
+        }
+        
+        if ($order['cupom_desconto'] > 0) {
+            $recibo .= "Desconto: -R$ " . number_format($order['cupom_desconto'], 2, ',', '.') . "\n";
+        }
+        
+        $recibo .= "TOTAL: R$ " . number_format($order['total'], 2, ',', '.') . "\n";
+        $recibo .= "\nObrigado pela preferência!";
+        
+        return $recibo;
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Pagamento confirmado com sucesso!',
+        'recibo' => generateReceipt($orderComplete),
+        'order_id' => $order_id
+    ]);
+    
+} catch(PDOException $e) {
+    error_log("Erro PDO em confirm_payment.php: " . $e->getMessage());
+    returnError('Erro interno do servidor');
+} catch(Exception $e) {
+    error_log("Erro geral em confirm_payment.php: " . $e->getMessage());
+    returnError('Erro interno do servidor');
 }
 ?>
-

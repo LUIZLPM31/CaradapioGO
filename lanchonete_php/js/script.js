@@ -542,33 +542,38 @@ function startPaymentCheck(orderId) {
 
 function checkPaymentStatus() {
     const orderNumber = document.getElementById('order-number').textContent;
+    
     if (!orderNumber) {
-        alert('Número do pedido não encontrado!');
+        alert('Número do pedido não encontrado');
         return;
     }
+    
     fetch('confirm_payment.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderNumber, action: 'check_status' })
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            order_id: parseInt(orderNumber)
+        })
     })
     .then(response => response.json())
     .then(data => {
-        const paymentStatus = document.getElementById('payment-status');
-        if (data.success && data.status_pagamento === 'confirmado') {
-            paymentStatus.className = 'payment-status success';
-            paymentStatus.innerHTML = '<strong>Pagamento confirmado!</strong>';
-        } else if (data.success && data.status_pagamento === 'pendente') {
-            paymentStatus.className = 'payment-status pending';
-            paymentStatus.innerHTML = '<strong>Aguardando pagamento...</strong><p>Pedido #' + orderNumber + '</p>';
+        if (data.success) {
+            // Atualizar status visual
+            const paymentStatus = document.getElementById('payment-status');
+            paymentStatus.className = 'payment-status confirmed';
+            paymentStatus.innerHTML = '<strong>Pagamento Confirmado!</strong>';
+            
+            // Mostrar recibo
+            showReceipt(data.recibo);
         } else {
-            paymentStatus.className = 'payment-status error';
-            paymentStatus.innerHTML = '<strong>Erro ao verificar pagamento.</strong>';
+            alert(data.message || 'Erro ao confirmar pagamento');
         }
     })
-    .catch(() => {
-        const paymentStatus = document.getElementById('payment-status');
-        paymentStatus.className = 'payment-status error';
-        paymentStatus.innerHTML = '<strong>Erro de conexão.</strong>';
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao verificar pagamento');
     });
 }
 
@@ -621,11 +626,12 @@ function closePixModal() {
 }
 
 function showReceipt(recibo) {
-    const modal = document.getElementById('receipt-modal');
-    const content = document.getElementById('receipt-content');
+    // Fechar modal PIX
+    document.getElementById('pix-modal').style.display = 'none';
     
-    content.innerHTML = generateReceiptHTML(recibo);
-    modal.style.display = 'block';
+    // Mostrar modal do recibo
+    document.getElementById('receipt-content').textContent = recibo;
+    document.getElementById('receipt-modal').style.display = 'flex';
 }
 
 function generateReceiptHTML(recibo) {

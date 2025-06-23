@@ -348,6 +348,8 @@ function updateCartCount() {
 
 // Atualiza ao carregar a página
 document.addEventListener('DOMContentLoaded', updateCartCount);
+// Atualiza quando o carrinho é alterado
+document.addEventListener('cartUpdated', updateCartCount);
 
 // Chame updateCartCount() sempre que adicionar/remover itens do carrinho
 </script>
