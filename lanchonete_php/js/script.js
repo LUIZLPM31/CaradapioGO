@@ -541,7 +541,8 @@ function startPaymentCheck(orderId) {
 }
 
 function checkPaymentStatus() {
-    const orderNumber = document.getElementById('order-number').textContent;
+    const orderNumber = document.getElementById('order-number').textContent = orderId;
+    
     
     if (!orderNumber) {
         alert('Número do pedido não encontrado');

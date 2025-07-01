@@ -279,55 +279,55 @@ try {
     </footer>
 
     <script src="js/script.js"></script>
+
+    <!-- Modal PIX -->
+    <div id="pix-modal" class="qr-modal">
+        <div class="qr-modal-content">
+            <h3>Pagamento PIX</h3>
+            <div id="qr-code-container" class="qr-code-container">
+                <img id="qr-code-image" src="" alt="QR Code PIX" style="display: none;">
+                <div id="qr-loading">Gerando QR Code...</div>
+            </div>
+            
+            <div class="payment-instructions">
+                <h4>Como pagar:</h4>
+                <ol>
+                    <li>Abra o app do seu banco</li>
+                    <li>Escolha a opção PIX</li>
+                    <li>Escaneie o QR Code acima</li>
+                    <li>Confirme o pagamento</li>
+                </ol>
+            </div>
+            
+            <div id="payment-status" class="payment-status pending">
+                <strong>Aguardando pagamento...</strong>
+                <p>Pedido #<span id="order-number"></span></p>
+                <p>Valor: R$ <span id="payment-amount"></span></p>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closePixModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="checkPaymentStatus()">Verificar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recibo -->
+    <div id="receipt-modal" class="qr-modal">
+        <div class="qr-modal-content">
+            <h3>Recibo Digital</h3>
+            <div id="receipt-content" class="receipt-content">
+                <!-- Conteúdo do recibo será inserido aqui -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="printReceipt()">Imprimir</button>
+                <button type="button" class="btn btn-primary" onclick="closeReceiptModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 
-
-        <!-- Modal PIX -->
-        <div id="pix-modal" class="qr-modal">
-            <div class="qr-modal-content">
-                <h3>Pagamento PIX</h3>
-                <div id="qr-code-container" class="qr-code-container">
-                    <img id="qr-code-image" src="" alt="QR Code PIX" style="display: none;">
-                    <div id="qr-loading">Gerando QR Code...</div>
-                </div>
-                
-                <div class="payment-instructions">
-                    <h4>Como pagar:</h4>
-                    <ol>
-                        <li>Abra o app do seu banco</li>
-                        <li>Escolha a opção PIX</li>
-                        <li>Escaneie o QR Code acima</li>
-                        <li>Confirme o pagamento</li>
-                    </ol>
-                </div>
-                
-                <div id="payment-status" class="payment-status pending">
-                    <strong>Aguardando pagamento...</strong>
-                    <p>Pedido #<span id="order-number"></span></p>
-                    <p>Valor: R$ <span id="payment-amount"></span></p>
-                </div>
-                
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closePixModal()">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="checkPaymentStatus()">Verificar Pagamento</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Recibo -->
-        <div id="receipt-modal" class="qr-modal">
-            <div class="qr-modal-content">
-                <h3>Recibo Digital</h3>
-                <div id="receipt-content" class="receipt-content">
-                    <!-- Conteúdo do recibo será inserido aqui -->
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="printReceipt()">Imprimir</button>
-                    <button type="button" class="btn btn-primary" onclick="closeReceiptModal()">Fechar</button>
-                </div>
-            </div>
-        </div>
 
         <!-- Script para atualizar contagem do carrinho -->
 <script>

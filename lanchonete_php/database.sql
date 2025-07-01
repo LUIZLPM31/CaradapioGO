@@ -110,10 +110,11 @@ INSERT INTO menu_items (nome, descricao, preco, categoria_id, imagem) VALUES
 ('Suco de Laranja', 'Suco natural de laranja 300ml', 7.90, 2, 'suco.jpg'),
 ('Batata Frita Grande', 'Porção de batata frita crocante para 2-3 pessoas', 15.90, 3, 'batata-frita.jpg'),
 ('Milk Shake de Chocolate', 'Cremoso milk shake de chocolate com chantilly', 12.90, 4, 'milk.jpg'),
-('Combo X-Burger', 'X-Burger Clássico + Batata Média + Refrigerante', 28.90, 5, 'combo.jpg'),
+('Combo X-Burger', 'X-Burger Clássico + Batata Média + Refrigerante', 28.90, 5, 'como1.jpg'),
 ('X-Tudo', 'Hambúrguer completo com carne, queijo, bacon, ovo, alface, tomate e molho especial', 25.90, 1, 'x-tudo.jpg'),
 ('X-Salada', 'Hambúrguer com carne, queijo, alface, tomate e maionese', 19.90, 1, 'x-salada.jpg'),
-('X-Calabresa', 'Hambúrguer com carne, queijo e calabresa fatiada', 21.90, 1, 'x-calabresa.jpg');
+('X-Calabresa', 'Hambúrguer com carne, queijo e calabresa fatiada', 21.90, 1, 'x-calabresa.jpg'),
+('Pudim', 'Maravilhoso pudim de leite, feito com carrinho', 8.90, 1, 'pudim.jpg');
 
 -- Cupons de exemplo
 INSERT INTO cupons (codigo, descricao, tipo, valor, data_inicio, data_fim) VALUES 

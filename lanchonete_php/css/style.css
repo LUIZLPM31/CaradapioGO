@@ -42,7 +42,7 @@ body {
 
 /* Header */
 .header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--primary-color);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow);
     position: sticky;
@@ -73,14 +73,14 @@ body {
 }
 
 .logo-text h1 {
-    color: var(--primary-color);
+    color: var(--light-gray);
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
 }
 
 .logo-text p {
-    color: var(--text-color);
+    color: var(--light-gray);
     font-size: 0.9rem;
     margin: 0;
 }
@@ -91,7 +91,8 @@ body {
 }
 
 .nav-link {
-    color: var(--text-color);
+    color: var(--light-gray);
+    background-color: var(--accent-color);
     text-decoration: none;
     font-weight: 500;
     padding: 10px 15px;
@@ -100,8 +101,8 @@ body {
 }
 
 .nav-link:hover {
-    background: var(--accent-color);
-    color: var(--secondary-color);
+    background: var(--light-gray);
+    color: var(--primary-color);
     transform: translateY(-2px);
 }
 
@@ -112,7 +113,7 @@ body {
 
 /* Hero section */
 .hero {
-    background: linear-gradient( rgba(255, 255, 255, 0.8)), url('../fundo.jpg');
+    background: linear-gradient(rgba(255,255,255), rgba(255,255,255)), url('fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -192,7 +193,7 @@ body {
 
 /* Cardápio section */
 .cardapio {
-    background: linear-gradient( rgba(255, 255, 255, 0.8)), url('../fundo.jpg');
+    background: linear-gradient(rgba(255,255,255), rgba(255,255,255)), url('fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -511,7 +512,7 @@ body {
 
 .admin-main {
     padding: 40px 0;
-    background: linear-gradient( rgba(255, 255, 255, 0.3)), url('../fundo.jpg');
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.6)), url('../fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -1135,11 +1136,15 @@ body {
 }
 
 /* Responsividade para modais */
-@media (max-width: 768px) {
+@media (max-width: 568px) {
     .qr-modal-content {
-        width: 95%;
-        margin: 2% auto;
+        width: 90%;
         padding: 1rem;
+        margin: 5% auto;
+        font-size: 0.9rem;
+        line-height: 1.2;
+        max-height: 300px;
+        overflow-y: auto;
     }
     
     .receipt-content {
