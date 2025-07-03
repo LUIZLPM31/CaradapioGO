@@ -98,7 +98,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - <?php echo SITE_NAME; ?></title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/png" href="/lanchonete_php/logo1.png">
+    <link rel="icon" type="image/png" href="/lanchonete_php/admin/logo1.png">
 </head>
 <body class="admin-body">
     <header class="admin-header">

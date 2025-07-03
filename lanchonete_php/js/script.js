@@ -541,40 +541,41 @@ function startPaymentCheck(orderId) {
 }
 
 function checkPaymentStatus() {
-    const orderNumber = document.getElementById('order-number').textContent = orderId;
-    
-    
-    if (!orderNumber) {
-        alert('Número do pedido não encontrado');
+    // Pegue o número do pedido do elemento do modal
+    const orderNumberElem = document.getElementById('order-number');
+    if (!orderNumberElem) {
+        alert('Elemento order-number não encontrado!');
         return;
     }
-    
+    const orderId = orderNumberElem.textContent.trim();
+    if (!orderId) {
+        alert('Número do pedido não encontrado!');
+        return;
+    }
+
     fetch('confirm_payment.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            order_id: parseInt(orderNumber)
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, action: 'check_status' })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            // Atualizar status visual
-            const paymentStatus = document.getElementById('payment-status');
-            paymentStatus.className = 'payment-status confirmed';
-            paymentStatus.innerHTML = '<strong>Pagamento Confirmado!</strong>';
-            
-            // Mostrar recibo
-            showReceipt(data.recibo);
+        const paymentStatus = document.getElementById('payment-status');
+        if (data.success && data.status_pagamento === 'confirmado') {
+            paymentStatus.className = 'payment-status success';
+            paymentStatus.innerHTML = '<strong>Pagamento confirmado!</strong>';
+        } else if (data.success && data.status_pagamento === 'pendente') {
+            paymentStatus.className = 'payment-status pending';
+            paymentStatus.innerHTML = '<strong>Aguardando pagamento...</strong><p>Pedido #' + orderId + '</p>';
         } else {
-            alert(data.message || 'Erro ao confirmar pagamento');
+            paymentStatus.className = 'payment-status error';
+            paymentStatus.innerHTML = '<strong>Erro ao verificar pagamento.</strong>';
         }
     })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro ao verificar pagamento');
+    .catch(() => {
+        const paymentStatus = document.getElementById('payment-status');
+        paymentStatus.className = 'payment-status error';
+        paymentStatus.innerHTML = '<strong>Erro de conexão.</strong>';
     });
 }
 
