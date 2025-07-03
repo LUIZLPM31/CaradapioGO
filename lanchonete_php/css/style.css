@@ -42,7 +42,7 @@ body {
 
 /* Header */
 .header {
-    background: var (--primary-color);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow);
     position: sticky;
@@ -73,14 +73,14 @@ body {
 }
 
 .logo-text h1 {
-    color: var(--light-gray);
+    color: var(--primary-color);
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
 }
 
 .logo-text p {
-    color: var(--light-gray);
+    color: var(--text-color);
     font-size: 0.9rem;
     margin: 0;
 }
