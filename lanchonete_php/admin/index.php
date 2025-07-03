@@ -46,15 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'delete_item':
                 $item_id = intval($_POST['item_id']);
-                
-                // Remover item da tabela order_items antes de excluir o menu_item
-                $stmt = $conn->prepare("DELETE FROM order_items WHERE item_id = :id");
-                $stmt->execute(['id' => $item_id]);
-
-                // Agora, excluir o item do menu_items
-                $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = :id");
-                $stmt->execute(['id' => $item_id]);
-                
+                $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
+                $stmt->execute([$item_id]);
                 $success = "Item excluído com sucesso!";
                 break;
         }
@@ -105,7 +98,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - <?php echo SITE_NAME; ?></title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/png" href="/lanchonete_php/admin/logo1.png">
+    <link rel="icon" type="image/png" href="/lanchonete_php/logo1.png">
 </head>
 <body class="admin-body">
     <header class="admin-header">
