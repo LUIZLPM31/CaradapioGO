@@ -25,7 +25,6 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
     color: var(--text-color);
     background: linear-gradient(rgba(44, 95, 45), rgba(44, 95, 45)), url('fundo.jpg');
     background-size: cover;
@@ -42,19 +41,26 @@ body {
 
 /* Header */
 .header {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow);
+    background: transparent; /* Começa transparente */
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: background-color 0.4s ease, box-shadow 0.4s ease; /* Transição suave */
 }
+
+/* Novo estilo para o header quando a página for rolada */
+.header.scrolled {
+    background: rgba(255, 255, 255, 0.95); /* Fundo branco semi-transparente */
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow); /* Adiciona a sombra de volta */
+}
+
 
 .header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 40px;
+    padding: 0.5rem 0px;
     flex-wrap: wrap;
 
 }
@@ -66,23 +72,25 @@ body {
 }
 
 .logo-img {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
 }
 
 .logo-text h1 {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     font-size: 1.8rem;
     font-weight: bold;
     margin: 0;
+    transition: color 0.4s ease; /* Adicione esta linha */
 }
 
 .logo-text p {
-    color: var(--text-color);
+    color: var(--secondary-color);
     font-size: 0.9rem;
     margin: 0;
+    transition: color 0.4s ease; /* Adicione esta linha */
 }
 
 .nav {
@@ -101,8 +109,8 @@ body {
 }
 
 .nav-link:hover {
-    background: var(--primary-color);
-    color: var(--secondary-color);
+    background: var(--secondary-color);
+    color: var(--primer-color);
     transform: translateY(-2px);
 }
 
@@ -113,12 +121,12 @@ body {
 
 /* Hero section */
 .hero {
-    background: linear-gradient( rgba(255, 255, 255, 0.8)), url('../fundo.jpg');
+    background: linear-gradient( rgba(255, 255, 255, 0.99)), url('../fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
     color: var(--text-color);
-    padding: 80px 0;
+    padding: 30px 0;
     text-align: center;
     margin: 20px;
     border-radius: var(--border-radius);
@@ -141,11 +149,11 @@ body {
 /* Buttons */
 .btn {
     display: inline-block;
-    padding: 12px 30px;
+    padding: 10px 20px;
     border: none;
     border-radius: var(--border-radius);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 300;
     cursor: pointer;
     transition: var(--transition);
     font-size: 1rem;
@@ -168,7 +176,7 @@ body {
 }
 
 .btn-secondary:hover {
-    background: #e63e00;
+    background: #1e4220;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
 }
@@ -193,7 +201,7 @@ body {
 
 /* Cardápio section */
 .cardapio {
-    background: linear-gradient( rgba(255, 255, 255, 0.8)), url('../fundo.jpg');
+    background: linear-gradient( rgba(255, 255, 255, 0.85)), url('../fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -512,7 +520,7 @@ body {
 
 .admin-main {
     padding: 40px 0;
-    background: linear-gradient( rgba(255, 255, 255, 0.3)), url('../fundo.jpg');
+    background: linear-gradient( rgba(255, 255, 255, 0.1)), url('../fundo.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -524,7 +532,7 @@ body {
 }
 
 .admin-section {
-    background: linear-gradient( rgba(255, 255, 255, 0.3));
+    background: linear-gradient( rgba(255, 255, 255, 0.5));
     padding: 30px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -735,8 +743,8 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: var(--primary-color);
-    color: var(--secondary-color);
+    background: var(--accent-color);
+    color: var(--light-gray);
     padding: 15px 25px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -854,6 +862,55 @@ body {
     .login-card {
         padding: 20px;
     }
+
+    /* Ajusta o tamanho da fonte base para o corpo do texto em telas pequenas */
+    body {
+        font-size: 10px;
+    }
+
+    /* Reduz o espaçamento do logo e ajusta o tamanho da fonte */
+    .logo {
+        gap: 5px;
+    }
+    .logo-text h1 {
+        font-size: 1.5rem;
+    }
+    .logo-text p {
+        font-size: 0.8rem;
+    }
+    .logo-img {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* Reduz ainda mais os títulos */
+    .hero h2 {
+        font-size: 1.8rem;
+    }
+
+    .cardapio h2, .carrinho h2, .checkout h2 {
+        font-size: 1.7rem;
+    }
+
+    .menu-item-content h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Faz com que os botões de ação ocupem 100% da largura para facilitar o toque */
+    .cart-actions .btn, .form-actions .btn {
+        width: 100%;
+        padding: 14px; /* Aumenta a área de toque */
+        font-size: 1rem;
+    }
+
+    /* Melhora a apresentação da finalização do pedido */
+    .checkout-summary {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+    .summary-line.total-line {
+        font-size: 1.1rem;
+    }
 }
 
 
@@ -954,8 +1011,10 @@ body {
     padding: 20px;
     border-radius: 8px;
     width: 90%;
-    max-width: 400px;
+    max-width: 350px;
+    max-height: 570px; 
     text-align: center;
+    overflow-y: auto;
 }
 
 .qr-code-container {
@@ -971,7 +1030,7 @@ body {
 }
 
 .qr-code-container img {
-    max-width: 250px;
+    max-width: 150px;
     height: auto;
 }
 
@@ -1105,11 +1164,12 @@ body {
 
 /* Animações para modais */
 .qr-modal {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn 0.5s ease-in-out;
+    
 }
 
 .qr-modal-content {
-    animation: slideIn 0.3s ease-in-out;
+    animation: slideIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -1151,5 +1211,80 @@ body {
     .qr-code-container img {
         max-width: 200px;
     }
+    /* Melhora o espaçamento e centraliza a navegação que quebra a linha */
+    .header .container {
+        padding: 1rem 20px;
+    }
+
+    .nav {
+        justify-content: center; /* Centraliza os botões de navegação */
+    }
+    
+    /* Reduz o tamanho dos títulos principais */
+    .hero h2 {
+        font-size: 2.2rem;
+    }
+    
+    .cardapio h2, .carrinho h2, .checkout h2 {
+        font-size: 2rem;
+    }
+
+    /* Ajusta o tamanho da fonte do preço para melhor visualização */
+    .price {
+        font-size: 1.2rem;
+    }
 }
 
+/* Estilos para o PIX Copia e Cola */
+.pix-copy-paste {
+    margin-top: 15px;
+    text-align: left;
+    width: 100%;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pix-copy-paste label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+    font-size: 14px;
+}
+
+.input-with-button {
+    display: flex;
+    align-items: center;
+}
+
+.input-with-button input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    background-color: #f4f4f4;
+    font-size: 10px; /* Reduzido para caber o código longo */
+    border-right: none;
+}
+
+.btn-copy {
+    padding: 8px 12px;
+    border: none;
+    background-color: #337ab7; /* Azul */
+    color: white;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.btn-copy:hover {
+    background-color: #286090;
+}
+/* Altera a cor do texto do logo quando o header estiver branco */
+.header.scrolled .logo-text h1,
+.header.scrolled .logo-text p {
+    color: var(--primary-color); /* A variável --primary-color é o seu tom de verde */
+}

@@ -39,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Administrativo - <?php echo SITE_NAME; ?></title>
+    <title>Login Adm</title>
     <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" type="image/png" href="/lanchonete_php/logo1.png">
+    <link rel="icon" type="image/png" href="logo1.png">
 </head>
 <body class="login-body">
     <div class="login-container">
@@ -75,11 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../" class="back-link">← Voltar ao site</a>
             </div>
             
-            <div class="login-demo">
-                <p><strong>Dados para teste:</strong></p>
-                <p>Email: admin@cardapiogo.com</p>
-                <p>Senha: admin123</p>
-            </div>
         </div>
     </div>
 </body>

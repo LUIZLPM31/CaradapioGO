@@ -4,6 +4,10 @@ let currentSection = 'hero';
 let appliedCoupon = null;
 let deliveryFee = 5.00;
 
+// Variáveis globais para PIX
+let currentOrderId = null;
+
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     initializeFilters();
@@ -105,7 +109,9 @@ function updateCartDisplay() {
     
     // Atualizar contador
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+    if (cartCount) {
+        cartCount.textContent = totalItems > 0 ? totalItems : '';
+    }
     
     // Atualizar lista de itens
     if (cartItems) {
@@ -182,8 +188,8 @@ function updateCheckoutSummary() {
     totalElement.innerHTML = '<strong>' + formatPrice(total) + '</strong>';
     
     // Mostrar/esconder linhas
-    discountLine.style.display = discount > 0 ? 'flex' : 'none';
-    deliveryLine.style.display = delivery > 0 ? 'flex' : 'none';
+    if (discountLine) discountLine.style.display = discount > 0 ? 'flex' : 'none';
+    if (deliveryLine) deliveryLine.style.display = delivery > 0 ? 'flex' : 'none';
 }
 
 // Navegação
@@ -279,7 +285,6 @@ function togglePaymentFields() {
 function applyCoupon() {
     const cupomInput = document.getElementById('cupom');
     const codigo = cupomInput.value.trim().toUpperCase();
-    const messageElement = document.getElementById('coupon-message');
     
     if (!codigo) {
         showCouponMessage('Digite um código de cupom', 'error');
@@ -322,8 +327,10 @@ function applyCoupon() {
 
 function showCouponMessage(message, type) {
     const messageElement = document.getElementById('coupon-message');
-    messageElement.textContent = message;
-    messageElement.className = 'coupon-message ' + type;
+    if (messageElement) {
+        messageElement.textContent = message;
+        messageElement.className = 'coupon-message ' + type;
+    }
 }
 
 // Processar pedido
@@ -405,7 +412,7 @@ function processOrder() {
         }
     })
     .catch(error => {
-        showNotification('Erro ao processar pedido. Tente novamente.');
+        showNotification('Erro ao processar pedido');
         console.error('Error:', error);
     })
     .finally(() => {
@@ -414,21 +421,167 @@ function processOrder() {
     });
 }
 
-function showOrderSuccess(orderId) {
-    showNotification('Pedido realizado com sucesso! Número: #' + orderId);
+// Função para mostrar pagamento PIX - CORRIGIDA
+// Cole este código no lugar das funções antigas em js/script.js
+
+// Função para mostrar pagamento PIX - AJUSTADA COM O TEMPO DE 10 SEGUNDOS
+function showPixPayment(orderId) {
+    currentOrderId = orderId;
+    const modal = document.getElementById('pix-modal');
+    const orderNumberEl = document.getElementById('order-number');
+    const paymentAmountEl = document.getElementById('payment-amount');
+
+    if (!modal) {
+        console.error('Modal PIX não encontrado');
+        showOrderSuccess(orderId); // Mostra sucesso se o modal falhar
+        return;
+    }
+
+    // Atualiza as informações do modal
+    if (orderNumberEl) {
+        orderNumberEl.textContent = String(orderId).padStart(6, '0');
+    }
+    if (paymentAmountEl) {
+        // Calcula o total final do carrinho para exibir no modal
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        let discount = 0;
+        if (appliedCoupon) {
+            discount = appliedCoupon.tipo === 'percentual' ? subtotal * (appliedCoupon.valor / 100) : appliedCoupon.valor;
+        }
+        const deliveryType = document.querySelector('input[name="tipo_entrega"]:checked');
+        const delivery = (deliveryType && deliveryType.value === 'entrega') ? deliveryFee : 0;
+        const total = Math.max(0, subtotal - discount + delivery);
+        
+        paymentAmountEl.textContent = total.toFixed(2).replace('.', ',');
+    }
+
+    // Garante que o status inicial seja "Aguardando pagamento..."
+    const paymentStatus = document.getElementById('payment-status');
+    if (paymentStatus) {
+        paymentStatus.className = 'payment-status pending';
+        paymentStatus.innerHTML = `<strong>Aguardando pagamento...</strong>
+            <p>Pedido #<span id="order-number">${String(orderId).padStart(6, '0')}</span></p>
+            <p>Valor: R$ <span id="payment-amount">${paymentAmountEl.textContent}</span></p>`;
+    }
+
+    // Mostra o modal
+    modal.style.display = 'block';
+    
+    // Inicia um temporizador de 10 segundos para simular a confirmação
+    console.log("Aguardando 10 segundos para simular a confirmação do pagamento...");
+    setTimeout(() => {
+        // Após 10 segundos, chama a função para verificar (e confirmar) o pagamento
+        checkPaymentStatus(orderId);
+    }, 15000); // 10000 milissegundos = 10 segundos
+}
+
+// Função para verificar o status do pagamento - AJUSTADA
+function checkPaymentStatus(orderId) {
+    fetch('confirm_payment.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            order_id: orderId || currentOrderId 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'confirmado') {
+            // 1. Mostra "Pagamento Confirmado"
+            showPaymentConfirmed();
+            
+            // 2. Espera mais 2 segundos antes de fechar e mostrar o recibo
+            setTimeout(() => {
+                closePixModal();
+                showReceipt(data.recibo);
+            }, 2000); // 2000 milissegundos = 2 segundos
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao verificar pagamento:', error);
+        // Opcional: fechar modal em caso de erro
+        closePixModal();
+        alert("Ocorreu um erro ao processar o pagamento.");
+    });
+}
+
+function showPaymentConfirmed() {
+    const paymentStatus = document.getElementById('payment-status');
+    if (paymentStatus) {
+        paymentStatus.className = 'payment-status confirmed';
+        paymentStatus.innerHTML = '<strong>Pagamento Confirmado!</strong><p>Processando pedido...</p>';
+    }
+}
+
+function closePixModal() {
+    const modal = document.getElementById('pix-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    // A verificação do paymentCheckInterval foi removida pois não usamos mais o sistema de loop.
+    currentOrderId = null;
+}
+
+function showReceipt(recibo) {
+    // Fechar modal PIX
+    closePixModal();
+    
+    // Mostrar modal do recibo
+    const receiptModal = document.getElementById('receipt-modal');
+    const receiptContent = document.getElementById('receipt-content');
+    
+    if (receiptModal && receiptContent) {
+        receiptContent.textContent = recibo;
+        receiptModal.style.display = 'flex';
+    }
+    
+    // Limpar carrinho e voltar ao início
     clearCart();
     showSection('hero');
     document.getElementById('checkout-form').reset();
     appliedCoupon = null;
 }
 
-function showPixPayment(orderId) {
-    // Aqui seria implementado o modal do PIX
-    // Por enquanto, apenas simular
-    showNotification('Pedido #' + orderId + ' criado! Gerando QR Code PIX...');
-    setTimeout(() => {
-        showOrderSuccess(orderId);
-    }, 3000);
+function closeReceiptModal() {
+    const modal = document.getElementById('receipt-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function printReceipt() {
+    const content = document.getElementById('receipt-content');
+    if (!content) return;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Recibo - CardapioGO</title>
+            <style>
+                body { font-family: 'Courier New', monospace; margin: 20px; }
+                .receipt-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 1rem; margin-bottom: 1rem; }
+                .receipt-section { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #ccc; }
+                .receipt-line { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
+                .receipt-line.total { font-weight: bold; border-top: 1px solid #333; padding-top: 0.5rem; }
+                .receipt-footer { text-align: center; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #333; }
+            </style>
+        </head>
+        <body><pre>${content.textContent}</pre></body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function showOrderSuccess(orderId) {
+    showNotification('Pedido realizado com sucesso! Número: #' + orderId);
+    clearCart();
+    showSection('hero');
+    document.getElementById('checkout-form').reset();
+    appliedCoupon = null;
 }
 
 // Utilitários
@@ -454,331 +607,66 @@ function showNotification(message) {
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
     }, 3000);
 }
 
 // Persistência do carrinho
 function saveCartToStorage() {
-    localStorage.setItem('cardapiogo_cart', JSON.stringify(cart));
+    try {
+        localStorage.setItem('cardapiogo_cart', JSON.stringify(cart));
+    } catch (error) {
+        console.error('Erro ao salvar carrinho:', error);
+    }
 }
 
 function loadCartFromStorage() {
-    const savedCart = localStorage.getItem('cardapiogo_cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
-        updateCartDisplay();
-    }
-}
-
-
-// Variáveis globais para PIX
-let currentOrderId = null;
-let paymentCheckInterval = null;
-
-// Função para mostrar pagamento PIX
-function showPixPayment(orderId) {
-    currentOrderId = orderId;
-    const modal = document.getElementById('pix-modal');
-    const orderNumber = document.getElementById('order-number');
-    const qrLoading = document.getElementById('qr-loading');
-    const qrImage = document.getElementById('qr-code-image');
-    
-    // Mostrar modal
-    modal.style.display = 'block';
-    orderNumber.textContent = String(orderId).padStart(6, '0');
-    
-    // Resetar estado
-    qrLoading.style.display = 'block';
-    qrImage.style.display = 'none';
-    
-    // Gerar QR Code
-    generateQRCode(orderId);
-    
-    // Iniciar verificação automática de pagamento
-    startPaymentCheck(orderId);
-}
-
-function generateQRCode(orderId) {
-    fetch('generate_qr.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            order_id: orderId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const qrLoading = document.getElementById('qr-loading');
-            const qrImage = document.getElementById('qr-code-image');
-            const paymentAmount = document.getElementById('payment-amount');
-            
-            qrLoading.style.display = 'none';
-            qrImage.src = data.qr_code;
-            qrImage.style.display = 'block';
-            paymentAmount.textContent = parseFloat(data.total).toFixed(2).replace('.', ',');
-        } else {
-            showNotification('Erro ao gerar QR Code: ' + data.error);
-            closePixModal();
+    try {
+        const savedCart = localStorage.getItem('cardapiogo_cart');
+        if (savedCart) {
+            cart = JSON.parse(savedCart);
+            updateCartDisplay();
         }
-    })
-    .catch(error => {
-        showNotification('Erro ao gerar QR Code');
-        console.error('Error:', error);
-        closePixModal();
-    });
-}
-
-function startPaymentCheck(orderId) {
-    // Verificar a cada 5 segundos
-    paymentCheckInterval = setInterval(() => {
-        checkPaymentStatus();
-    }, 5000);
-}
-
-function checkPaymentStatus() {
-    // Pegue o número do pedido do elemento do modal
-    const orderNumberElem = document.getElementById('order-number');
-    if (!orderNumberElem) {
-        alert('Elemento order-number não encontrado!');
-        return;
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error);
+        cart = [];
     }
-    const orderId = orderNumberElem.textContent.trim();
-    if (!orderId) {
-        alert('Número do pedido não encontrado!');
-        return;
-    }
-
-    fetch('confirm_payment.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId, action: 'check_status' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        const paymentStatus = document.getElementById('payment-status');
-        if (data.success && data.status_pagamento === 'confirmado') {
-            paymentStatus.className = 'payment-status success';
-            paymentStatus.innerHTML = '<strong>Pagamento confirmado!</strong>';
-        } else if (data.success && data.status_pagamento === 'pendente') {
-            paymentStatus.className = 'payment-status pending';
-            paymentStatus.innerHTML = '<strong>Aguardando pagamento...</strong><p>Pedido #' + orderId + '</p>';
-        } else {
-            paymentStatus.className = 'payment-status error';
-            paymentStatus.innerHTML = '<strong>Erro ao verificar pagamento.</strong>';
-        }
-    })
-    .catch(() => {
-        const paymentStatus = document.getElementById('payment-status');
-        paymentStatus.className = 'payment-status error';
-        paymentStatus.innerHTML = '<strong>Erro de conexão.</strong>';
-    });
-}
-
-function showPaymentConfirmed() {
-    const paymentStatus = document.getElementById('payment-status');
-    paymentStatus.className = 'payment-status confirmed';
-    paymentStatus.innerHTML = '<strong>Pagamento Confirmado!</strong><p>Processando pedido...</p>';
-}
-
-function confirmPayment() {
-    fetch('confirm_payment.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            order_id: currentOrderId,
-            action: 'confirm'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closePixModal();
-            showReceipt(data.recibo);
-            clearCart();
-            showSection('hero');
-            document.getElementById('checkout-form').reset();
-            appliedCoupon = null;
-        } else {
-            showNotification('Erro ao confirmar pagamento: ' + data.error);
-        }
-    })
-    .catch(error => {
-        showNotification('Erro ao confirmar pagamento');
-        console.error('Error:', error);
-    });
-}
-
-function closePixModal() {
-    const modal = document.getElementById('pix-modal');
-    modal.style.display = 'none';
-    
-    if (paymentCheckInterval) {
-        clearInterval(paymentCheckInterval);
-        paymentCheckInterval = null;
-    }
-    
-    currentOrderId = null;
-}
-
-function showReceipt(recibo) {
-    // Fechar modal PIX
-    document.getElementById('pix-modal').style.display = 'none';
-    
-    // Mostrar modal do recibo
-    document.getElementById('receipt-content').textContent = recibo;
-    document.getElementById('receipt-modal').style.display = 'flex';
-}
-
-function generateReceiptHTML(recibo) {
-    return `
-        <div class="receipt-header">
-            <h2>CardapioGO</h2>
-            <p>Seu cardápio digital em tempo real</p>
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Pedido #${recibo.numero_pedido}</h4>
-            <div class="receipt-line">
-                <span>Data do Pedido:</span>
-                <span>${recibo.data_pedido}</span>
-            </div>
-            <div class="receipt-line">
-                <span>Confirmação:</span>
-                <span>${recibo.data_confirmacao}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Cliente</h4>
-            <div class="receipt-line">
-                <span>Nome:</span>
-                <span>${recibo.cliente.nome}</span>
-            </div>
-            <div class="receipt-line">
-                <span>Telefone:</span>
-                <span>${recibo.cliente.telefone}</span>
-            </div>
-            <div class="receipt-line">
-                <span>E-mail:</span>
-                <span>${recibo.cliente.email}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Entrega</h4>
-            <div class="receipt-line">
-                <span>Tipo:</span>
-                <span>${recibo.entrega.tipo === 'entrega' ? 'Entrega em Casa' : 'Retirar no Balcão'}</span>
-            </div>
-            <div class="receipt-line">
-                <span>Endereço:</span>
-                <span>${recibo.entrega.endereco}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Itens</h4>
-            <p>${recibo.itens}</p>
-            ${recibo.observacoes ? `<p><strong>Obs:</strong> ${recibo.observacoes}</p>` : ''}
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Pagamento</h4>
-            <div class="receipt-line">
-                <span>Forma:</span>
-                <span>${recibo.pagamento.forma}</span>
-            </div>
-            <div class="receipt-line">
-                <span>Status:</span>
-                <span>${recibo.pagamento.status}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-section">
-            <h4>Valores</h4>
-            <div class="receipt-line">
-                <span>Subtotal:</span>
-                <span>R$ ${recibo.valores.subtotal}</span>
-            </div>
-            ${parseFloat(recibo.valores.desconto) > 0 ? `
-            <div class="receipt-line">
-                <span>Desconto:</span>
-                <span>- R$ ${recibo.valores.desconto}</span>
-            </div>` : ''}
-            ${parseFloat(recibo.valores.taxa_entrega) > 0 ? `
-            <div class="receipt-line">
-                <span>Taxa de Entrega:</span>
-                <span>R$ ${recibo.valores.taxa_entrega}</span>
-            </div>` : ''}
-            <div class="receipt-line total">
-                <span>TOTAL:</span>
-                <span>R$ ${recibo.valores.total}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-footer">
-            <p>Obrigado pela preferência!</p>
-            <p>CardapioGO - Sistema de Pedidos Online</p>
-        </div>
-    `;
-}
-
-function closeReceiptModal() {
-    const modal = document.getElementById('receipt-modal');
-    modal.style.display = 'none';
-}
-
-function printReceipt() {
-    const content = document.getElementById('receipt-content').innerHTML;
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Recibo - CardapioGO</title>
-            <style>
-                body { font-family: 'Courier New', monospace; margin: 20px; }
-                .receipt-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 1rem; margin-bottom: 1rem; }
-                .receipt-section { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #ccc; }
-                .receipt-line { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
-                .receipt-line.total { font-weight: bold; border-top: 1px solid #333; padding-top: 0.5rem; }
-                .receipt-footer { text-align: center; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #333; }
-            </style>
-        </head>
-        <body>${content}</body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-}
-
-// Atualizar função showOrderSuccess para usar o novo fluxo
-function showOrderSuccess(orderId) {
-    showNotification('Pedido realizado com sucesso! Número: #' + orderId);
-    clearCart();
-    showSection('hero');
-    document.getElementById('checkout-form').reset();
-    appliedCoupon = null;
 }
 
 function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cardapiogo_cart') || '[]');
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const cartCount = document.getElementById('cart-count');
-    if (count > 0) {
-        cartCount.textContent = `(${count})`;
-    } else {
-        cartCount.textContent = '';
+    try {
+        const cartData = JSON.parse(localStorage.getItem('cardapiogo_cart') || '[]');
+        const count = cartData.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+            cartCount.textContent = count > 0 ? count : '';
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar contador:', error);
     }
 }
+// Efeito de rolagem para o cabeçalho (header)
+function initializeHeaderScroll() {
+    const header = document.querySelector('.header');
+    if (!header) return;
 
-// Chame updateCartCount() sempre que o carrinho for alterado
-document.addEventListener('DOMContentLoaded', updateCartCount);
-// E também após adicionar/remover itens do carrinho
+    // Verifica a posição da rolagem ao carregar a página
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    }
 
+    // Adiciona um listener para o evento de scroll
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) { // Adiciona a classe se rolar mais de 50px
+            header.classList.add('scrolled');
+        } else { // Remove a classe se estiver no topo
+            header.classList.remove('scrolled');
+        }
+    });
+}
+
+// Chama a nova função quando o conteúdo da página for carregado
+document.addEventListener('DOMContentLoaded', initializeHeaderScroll);
