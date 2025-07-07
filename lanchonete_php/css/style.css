@@ -60,9 +60,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0px;
+    padding: 0.5rem 20px; /* Padding ajustado para ser mais compacto */
     flex-wrap: wrap;
-
 }
 
 .logo {
@@ -72,8 +71,8 @@ body {
 }
 
 .logo-img {
-    width: 80px;
-    height: 80px;
+    width: 60px; /* Reduzido de 80px */
+    height: 60px; /* Reduzido de 80px */
     border-radius: 50%;
     object-fit: cover;
 }
@@ -99,8 +98,8 @@ body {
 }
 
 .nav-link {
-    color: var(--light-gray);
-    background-color: var(--accent-color);
+    color: var(--secondary-color); /* Cor branca para combinar com o logo no topo */
+    background-color: transparent; /* Remove o fundo laranja */
     text-decoration: none;
     font-weight: 500;
     padding: 10px 15px;
@@ -229,7 +228,7 @@ body {
 }
 
 .filter-btn {
-    padding: 10px 20px;
+    padding: 5px 20px;
     border: 2px solid var(--primary-color);
     background: transparent;
     color: var(--primary-color);
@@ -743,8 +742,8 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: var(--accent-color);
-    color: var(--light-gray);
+    background: var(--light-gray);
+    color: var(--primary-color);
     padding: 15px 25px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -910,6 +909,60 @@ body {
     }
     .summary-line.total-line {
         font-size: 1.1rem;
+    }
+    /* --- Melhorias de Navbar e Página Principal --- */
+
+    /* Deixa o cabeçalho mais compacto em telas pequenas */
+    .header .container {
+        flex-direction: row; /* Força o alinhamento horizontal */
+        justify-content: space-between; /* Espaça o logo e o carrinho */
+        padding: 10px 15px; /* Ajusta o espaçamento interno */
+        align-items: center;
+    }
+
+    /* Ajusta o tamanho do logo e remove o slogan para limpar a navbar */
+    .logo-img {
+        width: 50px;
+        height: 50px;
+    }
+    .logo-text h1 {
+        font-size: 1.2rem; /* Diminui o nome "CardapioGO" */
+    }
+    .logo-text p {
+        display: none; /* Oculta o slogan em celulares para um visual mais limpo */
+    }
+
+    /* Otimiza os links de navegação */
+   .nav {
+    gap: 15px; /* Reduz o espaço entre os ícones de carrinho e admin */
+    align-items: center; /* Adicione esta linha para centralizar verticalmente os links */
+    }
+    .nav-link {
+        padding: 8px 10px; /* Deixa os botões de navegação mais compactos */
+    }
+    .shopee-svg-icon { /* Ajusta o tamanho do ícone do carrinho */
+        width: 24px;
+        height: 24px;
+    }
+    /* Deixa a seção principal mais impactante e legível */
+    .hero {
+        padding: 20px 10px; /* Aumenta o espaçamento interno para dar mais respiro */
+        margin: 10px;
+    }
+    .hero h2 {
+        font-size: 2rem; /* Aumenta um pouco o título principal para mais impacto */
+        line-height: 1.2; /* Melhora a legibilidade do título */
+    }
+    .hero p {
+        font-size: 1rem; /* Aumenta o subtítulo */
+        margin-bottom: 35px; /* Aumenta a distância para o botão */
+    }
+
+    .hero .btn-primary {
+        padding: 15px 25px; /* Deixa o botão "Ver Cardápio" maior e mais fácil de tocar */
+        font-size: 1.1rem;
+        width: 80%; /* Faz o botão ocupar 80% da largura */
+        max-width: 300px;
     }
 }
 
@@ -1287,4 +1340,20 @@ body {
 .header.scrolled .logo-text h1,
 .header.scrolled .logo-text p {
     color: var(--primary-color); /* A variável --primary-color é o seu tom de verde */
+}
+/* Novo estilo para o header quando a página for rolada */
+.header.scrolled {
+    background: rgba(255, 255, 255, 0.98); /* Fundo branco um pouco mais sólido */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color); /* Borda sutil em vez de sombra */
+}
+/* Muda a cor dos links de navegação quando o header está branco */
+.header.scrolled .nav-link {
+    color: var(--primary-color); /* Cor verde para combinar com o logo */
+}
+
+/* Efeito hover moderno para os links */
+.header.scrolled .nav-link:hover {
+    color: var(--accent-color); /* Laranja ao passar o mouse */
+    background: transparent;
 }

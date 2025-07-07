@@ -40,7 +40,7 @@ try {
             <header class="header">
                 <div class="container">
                     <div class="logo">
-                        <a href="index.php"><img src="logo.png" alt="<?php echo SITE_NAME; ?>" class="logo-img"></a>
+                        <a href="index.php"><img src="logo1.png" alt="<?php echo SITE_NAME; ?>" class="logo-img"></a>
                         <div class="logo-text">
                             <h1><?php echo SITE_NAME; ?></h1>
                             <p><?php echo SITE_SLOGAN; ?></p>
